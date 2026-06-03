@@ -2,7 +2,6 @@ using Lms.Api;
 using Lms.Api.Endpoints;
 using Lms.Application;
 using Lms.Infrastructure;
-using Lms.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
@@ -28,7 +27,7 @@ builder.Services.AddCors(options => options.AddPolicy(webCorsPolicy, policy =>
 // dependency being down never fails readiness.
 builder.Services.AddHealthChecks()
     .AddCheck("self", () => HealthCheckResult.Healthy(), tags: ["live"])
-    .AddDbContextCheck<AppDbContext>("postgres", tags: ["ready"]);
+    .AddCheck<Lms.Api.Health.DatabaseReadyHealthCheck>("postgres", tags: ["ready"]);
 
 builder.Services.AddOpenApi();
 
