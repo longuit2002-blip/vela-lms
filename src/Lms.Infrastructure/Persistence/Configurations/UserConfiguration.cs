@@ -1,4 +1,6 @@
+using Lms.Domain.Departments;
 using Lms.Domain.Organizations;
+using Lms.Domain.Positions;
 using Lms.Domain.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -15,6 +17,9 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.Id).HasColumnName("id");
 
         builder.Property(u => u.OrganizationId).HasColumnName("organization_id").IsRequired();
+        builder.Property(u => u.DepartmentId).HasColumnName("department_id");
+        builder.Property(u => u.PositionId).HasColumnName("position_id");
+        builder.HasIndex(u => new { u.OrganizationId, u.DepartmentId });
 
         builder.Property(u => u.Email).HasColumnName("email").HasMaxLength(320).IsRequired();
         // Email is normalized lowercase in the domain; uniqueness is per-organization.
@@ -43,6 +48,18 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasOne<Organization>()
             .WithMany()
             .HasForeignKey(u => u.OrganizationId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Optional placement FKs (no navigation). Restrict so a department/position with assigned
+        // users cannot be deleted at the DB level — the handlers also block this explicitly (U6/U7).
+        builder.HasOne<Department>()
+            .WithMany()
+            .HasForeignKey(u => u.DepartmentId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne<Position>()
+            .WithMany()
+            .HasForeignKey(u => u.PositionId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }
