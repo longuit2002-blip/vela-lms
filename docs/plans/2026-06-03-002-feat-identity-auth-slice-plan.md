@@ -1,7 +1,7 @@
 ---
 date: 2026-06-03
 type: feat
-status: active
+status: completed
 origin: docs/brainstorms/2026-06-03-lms-identity-auth-requirements.md
 ---
 
