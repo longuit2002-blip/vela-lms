@@ -25,4 +25,7 @@ public sealed class HttpTenantContext(IHttpContextAccessor accessor) : ITenantCo
     // their first role and drop the rest of their permissions.
     public IReadOnlyCollection<string> RoleCodes =>
         Principal?.FindAll("roles").Select(c => c.Value).ToArray() ?? [];
+
+    public Guid? CurrentDepartmentId =>
+        Guid.TryParse(Principal?.FindFirstValue("dept"), out var dept) ? dept : null;
 }

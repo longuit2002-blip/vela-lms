@@ -31,6 +31,9 @@ public static class DependencyInjection
         // FluentValidation validators for command/query input (resolved by ValidationBehavior).
         services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly, includeInternalTypes: true);
 
+        // ABAC dept-branch guard (Application-only deps; used inside department handlers).
+        services.AddScoped<IDepartmentBranchGuard, DepartmentBranchGuard>();
+
         return services;
     }
 }

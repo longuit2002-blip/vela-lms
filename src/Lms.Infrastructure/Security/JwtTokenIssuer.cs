@@ -28,6 +28,10 @@ public sealed class JwtTokenIssuer(RsaKeyProvider keys, IOptions<JwtOptions> opt
             ["roles"] = user.RoleCodes.ToArray(),
         };
 
+        // Dept-branch ABAC guard reads this claim to scope a branch-limited manager to their subtree.
+        if (user.DepartmentId is { } departmentId)
+            claims["dept"] = departmentId.ToString();
+
         // Forced-change gate reads this claim to block other actions until the password is changed.
         if (user.MustChangePassword)
             claims["mcp"] = true;

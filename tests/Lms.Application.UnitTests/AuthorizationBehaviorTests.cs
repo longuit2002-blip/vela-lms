@@ -16,6 +16,7 @@ public class AuthorizationBehaviorTests
         public Guid UserId { get; } = Guid.NewGuid();
         public bool IsAuthenticated { get; } = authenticated;
         public IReadOnlyCollection<string> RoleCodes { get; } = roleCodes;
+        public Guid? CurrentDepartmentId => null;
     }
 
     private sealed class FakePermissionResolver(params string[] granted) : IPermissionResolver

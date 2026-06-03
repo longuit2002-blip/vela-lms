@@ -15,4 +15,10 @@ public interface ICurrentUser
     /// from these server-side (see <see cref="IPermissionResolver"/>); empty when unauthenticated.
     /// </summary>
     IReadOnlyCollection<string> RoleCodes { get; }
+
+    /// <summary>
+    /// The caller's own department (the <c>dept</c> claim), used by the dept-branch ABAC guard.
+    /// Null when the user is unplaced or unauthenticated.
+    /// </summary>
+    Guid? CurrentDepartmentId { get; }
 }
