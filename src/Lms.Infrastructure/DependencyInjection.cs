@@ -16,6 +16,8 @@ public static class DependencyInjection
     {
         services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
         services.AddScoped<IOrganizationRepository, OrganizationRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddSingleton<IIdGenerator, Uuid7IdGenerator>();
         return services;
     }
