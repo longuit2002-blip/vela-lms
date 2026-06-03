@@ -123,4 +123,32 @@ public class UserTests
         // No public disable yet; assert the rule via the active path as a guard against regressions.
         Assert.True(user.CanAuthenticate(DateTimeOffset.UtcNow));
     }
+
+    [Fact]
+    public void Create_leaves_user_unplaced()
+    {
+        var user = NewUser();
+
+        Assert.Null(user.DepartmentId);
+        Assert.Null(user.PositionId);
+    }
+
+    [Fact]
+    public void PlaceIn_sets_department_and_position_and_bumps_timestamp()
+    {
+        var user = NewUser();
+        var dept = Guid.NewGuid();
+        var position = Guid.NewGuid();
+        var later = user.UpdatedAt.AddMinutes(5);
+
+        user.PlaceIn(dept, position, later);
+
+        Assert.Equal(dept, user.DepartmentId);
+        Assert.Equal(position, user.PositionId);
+        Assert.Equal(later, user.UpdatedAt);
+
+        user.PlaceIn(null, null, later.AddMinutes(1));
+        Assert.Null(user.DepartmentId);
+        Assert.Null(user.PositionId);
+    }
 }

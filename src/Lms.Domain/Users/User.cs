@@ -12,6 +12,8 @@ public sealed class User : Entity, IAggregateRoot
     private readonly List<string> _roleCodes = [];
 
     public Guid OrganizationId { get; private set; }
+    public Guid? DepartmentId { get; private set; }
+    public Guid? PositionId { get; private set; }
     public string Email { get; private set; } = null!;
     public string PasswordHash { get; private set; } = null!;
     public UserStatus Status { get; private set; }
@@ -130,6 +132,18 @@ public sealed class User : Entity, IAggregateRoot
             throw new ArgumentException("PasswordHash is required.", nameof(newPasswordHash));
 
         PasswordHash = newPasswordHash;
+        UpdatedAt = now;
+    }
+
+    /// <summary>
+    /// Places the user in a department and/or position (either may be null to clear). The caller
+    /// is responsible for ensuring the referenced department/position belong to the same
+    /// organization — the aggregate only stores the references.
+    /// </summary>
+    public void PlaceIn(Guid? departmentId, Guid? positionId, DateTimeOffset now)
+    {
+        DepartmentId = departmentId;
+        PositionId = positionId;
         UpdatedAt = now;
     }
 
