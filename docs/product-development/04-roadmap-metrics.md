@@ -39,7 +39,7 @@ ADMIN (Sidebar)
 
 AUTH
   /dang-nhap  /quen-mat-khau  /doi-mat-khau
-PLATFORM (BetterWork ops)  — subdomain/área riêng
+PLATFORM (Vela ops)  — subdomain riêng
   /platform/to-chuc  ...                                     (xuyên tenant)
 ```
 

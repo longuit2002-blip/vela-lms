@@ -24,7 +24,7 @@ Hệ thống là **multi-tenant enterprise LMS**: web SPA (Next.js) + mobile app
               │  HTTPS             │                     │
               ▼                    ▼                     ▼
         ┌───────────────────────────────────────────────────────┐
-        │            GOS ACADEMY LMS (this system)              │
+        │            Vela LMS        (this system)              │
         │   Web (Next.js)  ·  Mobile (React Native)  ·  API     │
         └───┬─────────┬─────────┬──────────┬─────────┬──────────┘
             ▼         ▼         ▼          ▼         ▼

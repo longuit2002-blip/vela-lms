@@ -1,6 +1,6 @@
-# GOS ACADEMY — BetterWork LMS · Tài liệu Sản phẩm & Kỹ thuật
+# Vela — LMS Doanh nghiệp · Tài liệu Sản phẩm & Kỹ thuật
 
-> **Mục đích / Purpose:** Bộ tài liệu này đặc tả đầy đủ (greenfield) để Claude Code và đội phát triển **xây dựng lại** nền tảng LMS doanh nghiệp "GOS ACADEMY (BetterWork LMS)" từ đầu. Tài liệu được tổng hợp và mở rộng từ bản hand-over khám phá ngày **03/06/2026** (URL gốc: `https://jacob.betterwork.vn/`).
+> **Mục đích / Purpose:** Bộ tài liệu này đặc tả đầy đủ (greenfield) để Claude Code và đội phát triển **xây dựng** nền tảng LMS doanh nghiệp **Vela** từ đầu. Spec được tổng hợp & mở rộng từ bản hand-over khám phá **sản phẩm nguồn GOS ACADEMY (BetterWork)** ngày **03/06/2026** (URL gốc: `https://jacob.betterwork.vn/`). *Vela là thương hiệu riêng — không tái sử dụng nhận diện của sản phẩm nguồn (xem [design-system/00-brand.md](design-system/00-brand.md)).*
 >
 > Đây **không** phải tài liệu vận hành sản phẩm hiện tại — mà là **spec để build mới**.
 
@@ -27,6 +27,7 @@
 | T8 | [technical-design/08-ai-search-dms-jobs.md](technical-design/08-ai-search-dms-jobs.md) | AI LMS (LLM/RAG), global search, DMS, Excel import, jobs |
 | T9 | [technical-design/09-infra-security-nfr.md](technical-design/09-infra-security-nfr.md) | Infra/CI-CD/CDN, threat model, audit, NFR, mobile |
 | **Technical Design — UI Design System** ||
+| D0 | [design-system/00-brand.md](design-system/00-brand.md) | Brand identity: tên **Vela**, logo concept, màu, voice |
 | D1 | [design-system/01-foundations.md](design-system/01-foundations.md) | Principles + design tokens (color/type/spacing/elevation/grid) |
 | D2 | [design-system/02-components.md](design-system/02-components.md) | Component library (specs + states + a11y) |
 | D3 | [design-system/03-patterns-content.md](design-system/03-patterns-content.md) | Page templates + microcopy/voice tiếng Việt |
@@ -53,7 +54,7 @@
 
 | Tiếng Việt | English (canonical) | Ghi chú |
 |---|---|---|
-| Tổ chức | **Organization** | = tenant. BetterWork host nhiều tổ chức. |
+| Tổ chức | **Organization** | = tenant. Vela host nhiều tổ chức. |
 | Phòng ban | **Department** | Node trong cây tổ chức. |
 | Chức vụ | **Position** | Vị trí công việc (gắn user). |
 | Vai trò | **Role** | Tập quyền (Admin tổng, Trưởng phòng…). |

@@ -1,6 +1,8 @@
-# GOS ACADEMY — BetterWork LMS
+# Vela — Enterprise LMS
 
-Enterprise LMS — greenfield rebuild. This repository is being built from the specs in [`docs/`](docs/README.md), starting with a **walking skeleton** (one `Organization` entity end-to-end through Clean Architecture → Next.js).
+**Vela** is a multi-tenant, gamified corporate learning platform (e-learning + instructor-led training + AI content generation + anti-leak video) for the Vietnamese market. Greenfield build from the specs in [`docs/`](docs/README.md), starting with a **walking skeleton** (one `Organization` entity end-to-end through Clean Architecture → Next.js).
+
+> Vela is its own brand — the specs reference a source product (GOS ACADEMY / BetterWork) only as provenance. See [docs/design-system/00-brand.md](docs/design-system/00-brand.md).
 
 - **Plan:** [docs/plans/2026-06-03-001-feat-lms-walking-skeleton-plan.md](docs/plans/2026-06-03-001-feat-lms-walking-skeleton-plan.md)
 - **Specs:** [docs/README.md](docs/README.md)

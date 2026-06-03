@@ -21,7 +21,7 @@
 ## 2. Color tokens
 
 ### 2.1 Semantic (light theme — mặc định)
-Dùng **semantic tokens** (không hardcode hex trong component). Giá trị tham chiếu (HSL/hex), tinh chỉnh theo brand BetterWork khi có.
+Dùng **semantic tokens** (không hardcode hex trong component). Giá trị tham chiếu (HSL/hex), tinh chỉnh theo brand **Vela** (xem [00-brand.md](00-brand.md)).
 
 | Token | Hex (gợi ý) | Dùng cho |
 |---|---|---|

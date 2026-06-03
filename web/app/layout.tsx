@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GOS ACADEMY — LMS",
-  description: "Enterprise LMS — walking skeleton",
+  title: "Vela — LMS",
+  description: "Vela — enterprise LMS (walking skeleton)",
 };
 
 export default function RootLayout({
