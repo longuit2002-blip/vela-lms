@@ -1,4 +1,5 @@
 using FluentValidation;
+using Lms.Application.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,6 +18,25 @@ public sealed class GlobalExceptionHandler(IProblemDetailsService problemDetails
         Exception exception,
         CancellationToken cancellationToken)
     {
+        // First branch: authorization denials (RBAC behavior + ABAC handler guards both throw this).
+        // Without it, denials would fall through to the 500 catch-all and leak detail in Development.
+        if (exception is ForbiddenException forbidden)
+        {
+            httpContext.Response.StatusCode = StatusCodes.Status403Forbidden;
+            return await problemDetailsService.TryWriteAsync(new ProblemDetailsContext
+            {
+                HttpContext = httpContext,
+                ProblemDetails = new ProblemDetails
+                {
+                    Status = StatusCodes.Status403Forbidden,
+                    Title = "Forbidden",
+                    // Reason only in Development — don't echo the permission taxonomy to clients in prod.
+                    Detail = environment.IsDevelopment() ? forbidden.Message : null,
+                    Type = "https://errors.vela.app/forbidden",
+                },
+            });
+        }
+
         if (exception is ValidationException validationException)
         {
             // camelCase the field keys so they match the JSON property names clients see.

@@ -9,4 +9,10 @@ public interface ICurrentUser
     Guid UserId { get; }
 
     bool IsAuthenticated { get; }
+
+    /// <summary>
+    /// The caller's role codes, read from the <c>roles</c> claim. Effective permissions are resolved
+    /// from these server-side (see <see cref="IPermissionResolver"/>); empty when unauthenticated.
+    /// </summary>
+    IReadOnlyCollection<string> RoleCodes { get; }
 }

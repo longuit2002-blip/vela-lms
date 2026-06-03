@@ -26,6 +26,7 @@ public static class DependencyInjection
         services.AddScoped<IPositionRepository, PositionRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IDepartmentClosure, DepartmentClosure>();
+        services.AddScoped<IPermissionResolver, Authorization.PermissionResolver>();
         services.AddSingleton<IIdGenerator, Uuid7IdGenerator>();
         services.AddSingleton<IPasswordHasher, Security.Argon2idPasswordHasher>();
         services.AddSingleton<IRefreshTokenHasher, Security.RefreshTokenHasher>();

@@ -19,4 +19,10 @@ public sealed class HttpTenantContext(IHttpContextAccessor accessor) : ITenantCo
         Guid.TryParse(Principal?.FindFirstValue("sub"), out var id) ? id : Guid.Empty;
 
     public bool IsAuthenticated => Principal?.Identity?.IsAuthenticated ?? false;
+
+    // FindAll, not FindFirstValue: with MapInboundClaims = false the JWT `roles` array materializes as
+    // multiple separate "roles" claims, so the first-value form would collapse a multi-role user to
+    // their first role and drop the rest of their permissions.
+    public IReadOnlyCollection<string> RoleCodes =>
+        Principal?.FindAll("roles").Select(c => c.Value).ToArray() ?? [];
 }
