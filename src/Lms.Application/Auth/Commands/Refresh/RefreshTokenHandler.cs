@@ -25,11 +25,10 @@ public sealed class RefreshTokenHandler(
     IOptions<JwtOptions> jwt)
     : IRequestHandler<RefreshTokenCommand, Result<AuthTokens>>
 {
-    private static readonly TimeSpan GraceWindow = TimeSpan.FromSeconds(10);
-
     public async ValueTask<Result<AuthTokens>> Handle(RefreshTokenCommand command, CancellationToken cancellationToken)
     {
         var now = DateTimeOffset.UtcNow;
+        var graceWindow = TimeSpan.FromSeconds(jwt.Value.RefreshGraceSeconds);
 
         if (string.IsNullOrWhiteSpace(command.RefreshToken))
             return Result.Unauthorized();
@@ -37,7 +36,7 @@ public sealed class RefreshTokenHandler(
         var presentedHash = refreshHasher.Hash(command.RefreshToken);
 
         // (1) Benign retry / concurrent tab — return the identical pair already minted for this token.
-        if (replayCache.TryGet(presentedHash, out var cached))
+        if (graceWindow > TimeSpan.Zero && replayCache.TryGet(presentedHash, out var cached))
             return Result.Success(cached);
 
         // (2) Atomic consume: only the winner of the race gets the row back.
@@ -70,7 +69,8 @@ public sealed class RefreshTokenHandler(
         var tokens = new AuthTokens(access.Value, access.ExpiresAt, raw.RawToken, refreshExpiresAt, user.MustChangePassword);
 
         // Cache so a retry of the just-consumed token within the grace window replays this exact pair.
-        replayCache.Set(presentedHash, tokens, GraceWindow);
+        if (graceWindow > TimeSpan.Zero)
+            replayCache.Set(presentedHash, tokens, graceWindow);
 
         return Result.Success(tokens);
     }

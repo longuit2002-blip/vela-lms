@@ -24,6 +24,13 @@ public sealed class JwtOptions
     [Range(1, 90)]
     public int RefreshTokenDays { get; init; } = 14;
 
+    /// <summary>
+    /// Grace window (seconds) during which re-presenting a just-rotated token replays the same pair
+    /// (benign retry / concurrent tab) instead of tripping reuse detection. 0 disables replay.
+    /// </summary>
+    [Range(0, 120)]
+    public int RefreshGraceSeconds { get; init; } = 10;
+
     /// <summary>Optional PEM-encoded RSA private key. Empty in dev → an ephemeral key is generated.</summary>
     public string? PrivateKeyPem { get; init; }
 

@@ -41,11 +41,17 @@ public class DependencyRuleTests
     }
 
     [Fact]
-    public void Application_should_not_depend_on_efcore_aspnetcore_or_npgsql()
+    public void Application_should_not_depend_on_efcore_aspnetcore_npgsql_or_crypto()
     {
+        // Crypto/JWT/EF/ASP all live behind ports in Infrastructure. Application sees only abstractions.
         var result = Types.InAssembly(ApplicationAssembly)
             .ShouldNot()
-            .HaveDependencyOnAny("Microsoft.EntityFrameworkCore", "Microsoft.AspNetCore", "Npgsql")
+            .HaveDependencyOnAny(
+                "Microsoft.EntityFrameworkCore",
+                "Microsoft.AspNetCore",
+                "Npgsql",
+                "Konscious",
+                "Microsoft.IdentityModel")
             .GetResult();
 
         Assert.True(result.IsSuccessful, Describe(result));
