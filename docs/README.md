@@ -95,7 +95,7 @@
 ## 4. Tóm tắt stack (chi tiết ở [T1](technical-design/01-architecture-stack.md))
 
 - **Frontend:** Next.js (React) + TypeScript · Tailwind + shadcn/ui · TanStack Query + Zustand · TipTap · Vidstack/HLS.js
-- **Backend:** **ASP.NET Core (.NET 8 LTS)** — **Clean Architecture** (Domain/Application/Infrastructure/API) · CQRS + MediatR · EF Core (Npgsql) · FluentValidation · Hangfire · SignalR
+- **Backend:** **ASP.NET Core (.NET 10 LTS)** — **Clean Architecture** (Domain/Application/Infrastructure/API) · CQRS + **martinothamar Mediator** (MIT; MediatR went commercial) · EF Core (Npgsql) · FluentValidation · Hangfire · SignalR
 - **Data:** PostgreSQL · Redis (cache + leaderboard) · S3-compatible storage · pgvector (RAG) · Meilisearch/OpenSearch (global search)
 - **Media:** FFmpeg → HLS · CDN · signed URLs · dynamic watermark
 - **AI:** Claude API (Anthropic) + RAG
