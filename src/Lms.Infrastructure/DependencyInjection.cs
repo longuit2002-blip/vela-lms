@@ -1,3 +1,7 @@
+using Lms.Application.Abstractions;
+using Lms.Infrastructure.Identifiers;
+using Lms.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Lms.Infrastructure;
@@ -8,9 +12,11 @@ namespace Lms.Infrastructure;
 /// </summary>
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services)
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, string connectionString)
     {
-        // U5 registers the Npgsql DbContext, OrganizationRepository, IIdGenerator, and health checks here.
+        services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
+        services.AddScoped<IOrganizationRepository, OrganizationRepository>();
+        services.AddSingleton<IIdGenerator, Uuid7IdGenerator>();
         return services;
     }
 }
