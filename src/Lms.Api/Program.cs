@@ -56,6 +56,7 @@ app.UseMiddleware<ForcedPasswordChangeMiddleware>();
 app.MapAuthEndpoints();
 app.MapOrganizationEndpoints();
 app.MapDepartmentEndpoints();
+app.MapPositionEndpoints();
 
 app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = r => r.Tags.Contains("live") });
 app.MapHealthChecks("/health/ready", new HealthCheckOptions { Predicate = r => r.Tags.Contains("ready") });
