@@ -14,6 +14,7 @@ public sealed class OrganizationEndpointsTests(WebAppFactory factory)
         var create = await _client.PostAsJsonAsync("/api/v1/organizations", new { name = "Acme Corp", slug = "Acme-Corp-AE1" });
 
         Assert.Equal(HttpStatusCode.Created, create.StatusCode);
+        Assert.NotNull(create.Headers.Location);   // 201 carries a Location header
         var created = await create.Content.ReadFromJsonAsync<OrgResponse>();
         Assert.NotNull(created);
         Assert.NotEqual(Guid.Empty, created!.Id);
@@ -32,6 +33,20 @@ public sealed class OrganizationEndpointsTests(WebAppFactory factory)
 
         Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
         Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
+        var body = await response.Content.ReadAsStringAsync();
+        Assert.Contains("\"name\"", body);   // field key is camelCase, not "Name"
+    }
+
+    [Theory] // Malformed-but-plausible slugs are 422 (validator mirrors the domain grammar), not 500.
+    [InlineData("a--b")]
+    [InlineData("-leading")]
+    [InlineData("trailing-")]
+    public async Task Create_with_malformed_slug_returns_422(string slug)
+    {
+        var response = await _client.PostAsJsonAsync("/api/v1/organizations", new { name = "Acme", slug });
+
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
+        Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
     }
 
     [Fact]
@@ -42,6 +57,7 @@ public sealed class OrganizationEndpointsTests(WebAppFactory factory)
 
         var second = await _client.PostAsJsonAsync("/api/v1/organizations", new { name = "Dup 2", slug = "dup-co" });
         Assert.Equal(HttpStatusCode.Conflict, second.StatusCode);
+        Assert.Equal("application/problem+json", second.Content.Headers.ContentType?.MediaType);
     }
 
     [Fact]

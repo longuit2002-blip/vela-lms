@@ -19,8 +19,9 @@ public sealed class GlobalExceptionHandler(IProblemDetailsService problemDetails
     {
         if (exception is ValidationException validationException)
         {
+            // camelCase the field keys so they match the JSON property names clients see.
             var errors = validationException.Errors
-                .GroupBy(e => e.PropertyName)
+                .GroupBy(e => ToCamelCase(e.PropertyName))
                 .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray());
 
             httpContext.Response.StatusCode = StatusCodes.Status422UnprocessableEntity;
@@ -59,4 +60,7 @@ public sealed class GlobalExceptionHandler(IProblemDetailsService problemDetails
             });
         }
     }
+
+    private static string ToCamelCase(string value) =>
+        string.IsNullOrEmpty(value) ? value : char.ToLowerInvariant(value[0]) + value[1..];
 }

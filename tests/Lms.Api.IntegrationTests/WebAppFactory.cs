@@ -49,7 +49,7 @@ public sealed class WebAppFactory : WebApplicationFactory<Program>, IAsyncLifeti
 
     public override async ValueTask DisposeAsync()
     {
-        await _postgres.DisposeAsync();
         await base.DisposeAsync();
+        await _postgres.DisposeAsync();
     }
 }

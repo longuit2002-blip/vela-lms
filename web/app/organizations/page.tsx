@@ -78,7 +78,7 @@ export default function OrganizationsPage() {
             Could not load organizations. {error instanceof Error ? error.message : ""} Is the API running?
           </p>
         ) : organizations.length === 0 ? (
-          <p className="px-5 py-8 text-center text-sm text-muted">Chưa có tổ chức nào.</p>
+          <p className="px-5 py-8 text-center text-sm text-muted">No organizations yet.</p>
         ) : (
           <table className="w-full text-left text-sm">
             <thead className="border-b border-border text-xs uppercase tracking-wide text-muted">

@@ -17,7 +17,7 @@ public sealed class CreateOrganizationValidator : AbstractValidator<CreateOrgani
         RuleFor(x => x.Slug)
             .NotEmpty()
             .MaximumLength(100)
-            .Matches("^[A-Za-z0-9-]+$")
-            .WithMessage("Slug may contain only letters, digits, and hyphens.");
+            .Matches("^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$")
+            .WithMessage("Slug must be alphanumeric segments separated by single hyphens (no leading/trailing/double hyphens).");
     }
 }

@@ -27,7 +27,15 @@ export class ApiError extends Error {
 
 async function parseJson(response: Response): Promise<unknown> {
   const text = await response.text();
-  const data = text ? JSON.parse(text) : null;
+  let data: unknown = null;
+  if (text) {
+    try {
+      data = JSON.parse(text);
+    } catch {
+      // Non-JSON body (e.g. a proxy/gateway error page) — surface a clean error, not a SyntaxError.
+      if (!response.ok) throw new ApiError(response.status, `Request failed (${response.status}).`);
+    }
+  }
 
   if (!response.ok) {
     const title =

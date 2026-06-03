@@ -12,6 +12,9 @@ public class CreateOrganizationValidatorTests
     [InlineData("Acme", "")]            // blank slug
     [InlineData("Acme", "has space")]   // slug with space
     [InlineData("Acme", "under_score")] // slug with underscore
+    [InlineData("Acme", "-leading")]    // leading hyphen (must mirror domain grammar)
+    [InlineData("Acme", "trailing-")]   // trailing hyphen
+    [InlineData("Acme", "a--b")]        // double hyphen
     public void Invalid_inputs_fail_validation(string name, string slug)
     {
         var result = _validator.Validate(new CreateOrganizationCommand(name, slug));
