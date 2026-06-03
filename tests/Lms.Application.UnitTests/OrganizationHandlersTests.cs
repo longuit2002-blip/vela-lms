@@ -36,6 +36,9 @@ public class OrganizationHandlersTests
         public Task<Organization?> FindByIdAsync(Guid id, CancellationToken cancellationToken)
             => Task.FromResult(Items.FirstOrDefault(o => o.Id == id));
 
+        public Task<Organization?> FindBySlugAsync(string slug, CancellationToken cancellationToken)
+            => Task.FromResult(Items.FirstOrDefault(o => o.Slug == slug));
+
         public Task SaveChangesAsync(CancellationToken cancellationToken)
         {
             SaveCount++;

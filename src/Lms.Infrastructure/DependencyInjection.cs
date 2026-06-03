@@ -28,6 +28,7 @@ public static class DependencyInjection
         services.AddSingleton<IJwtTokenIssuer, Security.JwtTokenIssuer>();
         services.AddMemoryCache();
         services.AddSingleton<IRefreshReplayCache, Security.RefreshReplayCache>();
+        services.AddScoped<Seeding.IdentitySeeder>();
         return services;
     }
 }

@@ -14,5 +14,7 @@ public interface IOrganizationRepository
 
     Task<Organization?> FindByIdAsync(Guid id, CancellationToken cancellationToken);
 
+    Task<Organization?> FindBySlugAsync(string slug, CancellationToken cancellationToken);
+
     Task SaveChangesAsync(CancellationToken cancellationToken);
 }

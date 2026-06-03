@@ -40,6 +40,10 @@ app.UseExceptionHandler();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+
+    // Dev-only: provision the first org + OrgOwner when seeding is enabled (no-op otherwise).
+    using var scope = app.Services.CreateScope();
+    await scope.ServiceProvider.GetRequiredService<Lms.Infrastructure.Seeding.IdentitySeeder>().SeedAsync();
 }
 
 app.UseCors(webCorsPolicy);

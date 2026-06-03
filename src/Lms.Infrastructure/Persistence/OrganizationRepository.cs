@@ -15,6 +15,9 @@ public sealed class OrganizationRepository(AppDbContext db) : IOrganizationRepos
     public Task<Organization?> FindByIdAsync(Guid id, CancellationToken cancellationToken)
         => db.Organizations.FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
 
+    public Task<Organization?> FindBySlugAsync(string slug, CancellationToken cancellationToken)
+        => db.Organizations.FirstOrDefaultAsync(o => o.Slug == slug, cancellationToken);
+
     public Task SaveChangesAsync(CancellationToken cancellationToken)
         => db.SaveChangesAsync(cancellationToken);
 }
