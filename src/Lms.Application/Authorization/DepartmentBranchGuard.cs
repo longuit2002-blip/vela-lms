@@ -24,4 +24,11 @@ public sealed class DepartmentBranchGuard(
         if (!await closure.IsInBranchAsync(callerDepartmentId, targetDepartmentId, cancellationToken))
             throw new ForbiddenException("The target department is outside your branch.");
     }
+
+    public async Task EnsureFullScopeAsync(CancellationToken cancellationToken)
+    {
+        var granted = await permissionResolver.ResolveAsync(currentUser.UserId, currentUser.RoleCodes, cancellationToken);
+        if (!granted.Contains(Permissions.Departments.ManageAll))
+            throw new ForbiddenException("This action requires organization-wide (full-scope) management.");
+    }
 }

@@ -9,4 +9,11 @@ namespace Lms.Application.Authorization;
 public interface IDepartmentBranchGuard
 {
     Task EnsureCanManageAsync(Guid targetDepartmentId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Requires full-scope (org-wide) management — used for operations with no in-tree target a branch
+    /// manager could own, i.e. creating a root department or moving one to the root. Branch-limited
+    /// callers are denied (a root sits outside any branch).
+    /// </summary>
+    Task EnsureFullScopeAsync(CancellationToken cancellationToken);
 }
