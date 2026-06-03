@@ -14,7 +14,11 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, string connectionString)
     {
-        services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
+        services.AddScoped<Persistence.Interceptors.TenantConnectionInterceptor>();
+        services.AddDbContext<AppDbContext>((sp, options) =>
+            options
+                .UseNpgsql(connectionString)
+                .AddInterceptors(sp.GetRequiredService<Persistence.Interceptors.TenantConnectionInterceptor>()));
         services.AddScoped<IOrganizationRepository, OrganizationRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();

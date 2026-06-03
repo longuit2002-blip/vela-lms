@@ -1,3 +1,5 @@
+using Lms.Api.Identity;
+using Lms.Application.Abstractions;
 using Lms.Infrastructure.Security;
 using Microsoft.Extensions.Options;
 
@@ -34,6 +36,13 @@ public static class AuthServiceCollectionExtensions
         services.AddSingleton<IValidateOptions<SeedOptions>, SeedOptionsValidator>();
 
         services.AddSingleton<RsaKeyProvider>();
+
+        // Tenant/user context resolved from JWT claims, shared by endpoints, the DbContext, and the
+        // tenant connection interceptor.
+        services.AddHttpContextAccessor();
+        services.AddScoped<HttpTenantContext>();
+        services.AddScoped<ITenantContext>(sp => sp.GetRequiredService<HttpTenantContext>());
+        services.AddScoped<ICurrentUser>(sp => sp.GetRequiredService<HttpTenantContext>());
 
         return services;
     }

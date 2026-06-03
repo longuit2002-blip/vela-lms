@@ -1,10 +1,12 @@
 using Lms.Infrastructure.Persistence;
+using Lms.Infrastructure.Persistence.Interceptors;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Npgsql;
 using Testcontainers.PostgreSql;
 
 namespace Lms.Api.IntegrationTests;
@@ -19,6 +21,19 @@ public sealed class WebAppFactory : WebApplicationFactory<Program>, IAsyncLifeti
     private readonly PostgreSqlContainer _postgres = new PostgreSqlBuilder()
         .WithImage("postgres:17-alpine")
         .Build();
+
+    /// <summary>Superuser connection string for the container (the role the app currently connects as).</summary>
+    public string ConnectionString => _postgres.GetConnectionString();
+
+    /// <summary>
+    /// Connection string for the non-owner <c>lms_app</c> role created by the RLS migration — the
+    /// role that is actually SUBJECT to row-level security. Isolation tests use this to prove the policy.
+    /// </summary>
+    public string AppRoleConnectionString => new NpgsqlConnectionStringBuilder(_postgres.GetConnectionString())
+    {
+        Username = "lms_app",
+        Password = "lms_app_local_dev",
+    }.ConnectionString;
 
     public async ValueTask InitializeAsync()
     {
@@ -40,7 +55,9 @@ public sealed class WebAppFactory : WebApplicationFactory<Program>, IAsyncLifeti
         {
             services.RemoveAll<DbContextOptions<AppDbContext>>();
             services.RemoveAll<DbContextOptions>();
-            services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
+            services.AddDbContext<AppDbContext>((sp, options) => options
+                .UseNpgsql(connectionString)
+                .AddInterceptors(sp.GetRequiredService<TenantConnectionInterceptor>()));
         });
     }
 

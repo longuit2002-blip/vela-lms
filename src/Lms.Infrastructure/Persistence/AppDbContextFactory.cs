@@ -20,6 +20,7 @@ public sealed class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbConte
             .UseNpgsql(connectionString)
             .Options;
 
-        return new AppDbContext(options);
+        // No HTTP request at design time — use the no-tenant context.
+        return new AppDbContext(options, NullTenantContext.Instance);
     }
 }
