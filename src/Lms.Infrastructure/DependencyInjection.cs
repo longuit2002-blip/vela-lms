@@ -19,6 +19,9 @@ public static class DependencyInjection
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddSingleton<IIdGenerator, Uuid7IdGenerator>();
+        services.AddSingleton<IPasswordHasher, Security.Argon2idPasswordHasher>();
+        services.AddSingleton<IRefreshTokenHasher, Security.RefreshTokenHasher>();
+        services.AddSingleton<IJwtTokenIssuer, Security.JwtTokenIssuer>();
         return services;
     }
 }
