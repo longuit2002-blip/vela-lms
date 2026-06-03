@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.Extensions.Options;
 
-namespace Lms.Infrastructure.Security;
+namespace Lms.Application.Auth;
 
 /// <summary>
 /// JWT issuance + validation settings (config section <c>Jwt</c>). For dev, leave

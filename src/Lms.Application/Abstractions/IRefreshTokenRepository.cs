@@ -20,8 +20,11 @@ public interface IRefreshTokenRepository
     /// </summary>
     Task<RefreshToken?> TryConsumeAsync(string tokenHash, Guid childId, DateTimeOffset now, CancellationToken cancellationToken);
 
-    /// <summary>Revokes every still-active token in a family (reuse detection, password change, logout-all).</summary>
+    /// <summary>Revokes every still-active token in a family (reuse detection, logout).</summary>
     Task RevokeFamilyAsync(Guid familyId, string reason, DateTimeOffset now, CancellationToken cancellationToken);
+
+    /// <summary>Revokes every still-active token for a user (password change forces re-login everywhere).</summary>
+    Task RevokeAllForUserAsync(Guid userId, string reason, DateTimeOffset now, CancellationToken cancellationToken);
 
     Task SaveChangesAsync(CancellationToken cancellationToken);
 }

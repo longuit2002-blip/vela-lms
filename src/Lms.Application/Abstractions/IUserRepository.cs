@@ -19,6 +19,12 @@ public interface IUserRepository
 
     Task<User?> FindByIdAsync(Guid id, CancellationToken cancellationToken);
 
+    /// <summary>
+    /// Looks up a user by id for token issuance during refresh (re-sourcing roles/status). Refresh is
+    /// an unauthenticated flow with no tenant context, so this bypasses the tenant query filter.
+    /// </summary>
+    Task<User?> FindByIdForTokenIssueAsync(Guid id, CancellationToken cancellationToken);
+
     Task<bool> EmailExistsAsync(Guid organizationId, string email, CancellationToken cancellationToken);
 
     Task SaveChangesAsync(CancellationToken cancellationToken);

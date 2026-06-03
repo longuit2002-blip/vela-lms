@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using Lms.Application.Auth;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 

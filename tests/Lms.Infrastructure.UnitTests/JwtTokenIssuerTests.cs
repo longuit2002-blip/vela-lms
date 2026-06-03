@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Lms.Application.Auth;
 using Lms.Domain.Users;
 using Lms.Infrastructure.Security;
 using Microsoft.Extensions.Options;

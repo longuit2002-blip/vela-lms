@@ -1,4 +1,5 @@
 using Lms.Application.Abstractions;
+using Lms.Application.Auth;
 using Lms.Domain.Users;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -20,6 +21,17 @@ public sealed class JwtTokenIssuer(RsaKeyProvider keys, IOptions<JwtOptions> opt
         var jwt = options.Value;
         var expires = now.AddMinutes(jwt.AccessTokenMinutes);
 
+        var claims = new Dictionary<string, object>
+        {
+            ["sub"] = user.Id.ToString(),
+            ["org"] = user.OrganizationId.ToString(),
+            ["roles"] = user.RoleCodes.ToArray(),
+        };
+
+        // Forced-change gate reads this claim to block other actions until the password is changed.
+        if (user.MustChangePassword)
+            claims["mcp"] = true;
+
         var descriptor = new SecurityTokenDescriptor
         {
             Issuer = jwt.Issuer,
@@ -27,12 +39,7 @@ public sealed class JwtTokenIssuer(RsaKeyProvider keys, IOptions<JwtOptions> opt
             IssuedAt = now.UtcDateTime,
             NotBefore = now.UtcDateTime,
             Expires = expires.UtcDateTime,
-            Claims = new Dictionary<string, object>
-            {
-                ["sub"] = user.Id.ToString(),
-                ["org"] = user.OrganizationId.ToString(),
-                ["roles"] = user.RoleCodes.ToArray(),
-            },
+            Claims = claims,
             SigningCredentials = keys.SigningCredentials,
         };
 

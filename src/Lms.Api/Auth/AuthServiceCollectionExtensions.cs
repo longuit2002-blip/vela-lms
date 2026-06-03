@@ -1,7 +1,11 @@
 using Lms.Api.Identity;
 using Lms.Application.Abstractions;
+using Lms.Application.Auth;
 using Lms.Infrastructure.Security;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Lms.Api;
 
@@ -43,6 +47,40 @@ public static class AuthServiceCollectionExtensions
         services.AddScoped<HttpTenantContext>();
         services.AddScoped<ITenantContext>(sp => sp.GetRequiredService<HttpTenantContext>());
         services.AddScoped<ICurrentUser>(sp => sp.GetRequiredService<HttpTenantContext>());
+
+        // JWT bearer validation (RS256). Claim mapping off so raw sub/org/roles/mcp are preserved.
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
+        services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
+            .Configure<RsaKeyProvider, IOptions<JwtOptions>>((bearer, keys, jwtOptions) =>
+            {
+                var jwt = jwtOptions.Value;
+                bearer.MapInboundClaims = false;
+                bearer.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwt.Issuer,
+                    ValidAudience = jwt.Audience,
+                    IssuerSigningKey = keys.SecurityKey,
+                    ClockSkew = TimeSpan.FromMinutes(1),
+                };
+            });
+        services.AddAuthorization();
+
+        // Interim coarse login rate limit (no Redis); robust per-IP throttling deferred.
+        var rateLimit = configuration.GetSection(RateLimitOptions.SectionName).Get<RateLimitOptions>() ?? new RateLimitOptions();
+        services.AddRateLimiter(options =>
+        {
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+            options.AddFixedWindowLimiter("login", limiter =>
+            {
+                limiter.Window = TimeSpan.FromMinutes(1);
+                limiter.PermitLimit = rateLimit.LoginAttemptsPerMinute;
+                limiter.QueueLimit = 0;
+            });
+        });
 
         return services;
     }

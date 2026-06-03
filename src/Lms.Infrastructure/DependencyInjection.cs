@@ -26,6 +26,8 @@ public static class DependencyInjection
         services.AddSingleton<IPasswordHasher, Security.Argon2idPasswordHasher>();
         services.AddSingleton<IRefreshTokenHasher, Security.RefreshTokenHasher>();
         services.AddSingleton<IJwtTokenIssuer, Security.JwtTokenIssuer>();
+        services.AddMemoryCache();
+        services.AddSingleton<IRefreshReplayCache, Security.RefreshReplayCache>();
         return services;
     }
 }

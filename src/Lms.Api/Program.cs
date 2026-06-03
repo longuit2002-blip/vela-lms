@@ -1,4 +1,5 @@
 using Lms.Api;
+using Lms.Api.Auth;
 using Lms.Api.Endpoints;
 using Lms.Application;
 using Lms.Infrastructure;
@@ -21,7 +22,7 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 const string webCorsPolicy = "web";
 var webOrigin = builder.Configuration["Cors:WebOrigin"] ?? "http://localhost:3000";
 builder.Services.AddCors(options => options.AddPolicy(webCorsPolicy, policy =>
-    policy.WithOrigins(webOrigin).AllowAnyHeader().AllowAnyMethod()));
+    policy.WithOrigins(webOrigin).AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
 
 // Liveness = process up (no dependencies). Readiness = Postgres reachable (the dependency the
 // skeleton actually uses). Redis/MinIO get non-gating checks in a later phase so an unused
@@ -43,6 +44,12 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors(webCorsPolicy);
 
+app.UseRateLimiter();
+app.UseAuthentication();
+app.UseAuthorization();
+app.UseMiddleware<ForcedPasswordChangeMiddleware>();
+
+app.MapAuthEndpoints();
 app.MapOrganizationEndpoints();
 
 app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = r => r.Tags.Contains("live") });

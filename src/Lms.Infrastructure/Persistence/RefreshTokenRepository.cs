@@ -43,6 +43,16 @@ public sealed class RefreshTokenRepository(AppDbContext db) : IRefreshTokenRepos
                     .SetProperty(t => t.RevokedReason, reason),
                 cancellationToken);
 
+    public Task RevokeAllForUserAsync(Guid userId, string reason, DateTimeOffset now, CancellationToken cancellationToken)
+        => db.RefreshTokens
+            .IgnoreQueryFilters()
+            .Where(t => t.UserId == userId && t.RevokedAt == null)
+            .ExecuteUpdateAsync(
+                setters => setters
+                    .SetProperty(t => t.RevokedAt, now)
+                    .SetProperty(t => t.RevokedReason, reason),
+                cancellationToken);
+
     public Task SaveChangesAsync(CancellationToken cancellationToken)
         => db.SaveChangesAsync(cancellationToken);
 }

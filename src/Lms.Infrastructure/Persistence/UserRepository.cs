@@ -21,6 +21,9 @@ public sealed class UserRepository(AppDbContext db) : IUserRepository
     public Task<User?> FindByIdAsync(Guid id, CancellationToken cancellationToken)
         => db.Users.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
 
+    public Task<User?> FindByIdForTokenIssueAsync(Guid id, CancellationToken cancellationToken)
+        => db.Users.IgnoreQueryFilters().FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
+
     public Task<bool> EmailExistsAsync(Guid organizationId, string email, CancellationToken cancellationToken)
     {
         var normalized = (email ?? string.Empty).Trim().ToLowerInvariant();

@@ -9,6 +9,7 @@
     <!-- ASP.NET / framework (aligned to the installed .NET 10 SDK band) -->
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0-rc.1.25451.107" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.0-rc.1.25451.107" />
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.0-rc.1.25451.107" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,6 +28,7 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.0-rc.1.25451.107" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0-rc.1" />
     <PackageVersion Include="Medo.Uuid7" Version="3.2.0" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="10.0.0-rc.1.25451.107" />
   </ItemGroup>
 
   <ItemGroup>
