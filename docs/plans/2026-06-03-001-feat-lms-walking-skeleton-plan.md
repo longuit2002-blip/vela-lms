@@ -1,7 +1,7 @@
 ---
 title: "feat: LMS Walking Skeleton — Foundation Scaffold"
 type: feat
-status: active
+status: completed
 date: 2026-06-03
 origin: docs/brainstorms/2026-06-03-lms-walking-skeleton-requirements.md
 ---
