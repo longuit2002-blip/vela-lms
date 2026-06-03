@@ -13,6 +13,7 @@ var connectionString = builder.Configuration.GetConnectionString("Postgres")
 // Composition root — the only place Infrastructure is wired into the app.
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(connectionString);
+builder.Services.AddAuthInfrastructure(builder.Configuration);
 
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
