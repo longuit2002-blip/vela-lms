@@ -1,41 +1,54 @@
+using Lms.Api;
+using Lms.Api.Endpoints;
+using Lms.Application;
+using Lms.Infrastructure;
+using Lms.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+var connectionString = builder.Configuration.GetConnectionString("Postgres")
+    ?? throw new InvalidOperationException("Missing connection string 'Postgres'.");
+
+// Composition root — the only place Infrastructure is wired into the app.
+builder.Services.AddApplication();
+builder.Services.AddInfrastructure(connectionString);
+
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
+const string webCorsPolicy = "web";
+var webOrigin = builder.Configuration["Cors:WebOrigin"] ?? "http://localhost:3000";
+builder.Services.AddCors(options => options.AddPolicy(webCorsPolicy, policy =>
+    policy.WithOrigins(webOrigin).AllowAnyHeader().AllowAnyMethod()));
+
+// Liveness = process up (no dependencies). Readiness = Postgres reachable (the dependency the
+// skeleton actually uses). Redis/MinIO get non-gating checks in a later phase so an unused
+// dependency being down never fails readiness.
+builder.Services.AddHealthChecks()
+    .AddCheck("self", () => HealthCheckResult.Healthy(), tags: ["live"])
+    .AddDbContextCheck<AppDbContext>("postgres", tags: ["ready"]);
+
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+app.UseExceptionHandler();
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
+app.UseCors(webCorsPolicy);
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+app.MapOrganizationEndpoints();
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = r => r.Tags.Contains("live") });
+app.MapHealthChecks("/health/ready", new HealthCheckOptions { Predicate = r => r.Tags.Contains("ready") });
 
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
+// Exposed for WebApplicationFactory in integration tests (U7).
+public partial class Program;
