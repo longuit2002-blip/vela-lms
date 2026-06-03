@@ -12,7 +12,7 @@ public interface IOrganizationRepository
 
     Task<bool> SlugExistsAsync(string slug, CancellationToken cancellationToken);
 
-    Task<IReadOnlyList<Organization>> ListAsync(CancellationToken cancellationToken);
+    Task<Organization?> FindByIdAsync(Guid id, CancellationToken cancellationToken);
 
     Task SaveChangesAsync(CancellationToken cancellationToken);
 }

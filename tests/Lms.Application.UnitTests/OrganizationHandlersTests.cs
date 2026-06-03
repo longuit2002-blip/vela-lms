@@ -1,7 +1,7 @@
 using Ardalis.Result;
 using Lms.Application.Abstractions;
 using Lms.Application.Organizations.Commands.CreateOrganization;
-using Lms.Application.Organizations.Queries.ListOrganizations;
+using Lms.Application.Organizations.Queries.GetMyOrganization;
 using Lms.Domain.Organizations;
 
 namespace Lms.Application.UnitTests;
@@ -11,6 +11,11 @@ public class OrganizationHandlersTests
     private sealed class FakeIdGenerator(Guid id) : IIdGenerator
     {
         public Guid NewId() => id;
+    }
+
+    private sealed class FakeTenantContext(Guid organizationId) : ITenantContext
+    {
+        public Guid OrganizationId => organizationId;
     }
 
     private sealed class FakeOrganizationRepository : IOrganizationRepository
@@ -28,8 +33,8 @@ public class OrganizationHandlersTests
         public Task<bool> SlugExistsAsync(string slug, CancellationToken cancellationToken)
             => Task.FromResult(ExistingSlugs.Contains(slug));
 
-        public Task<IReadOnlyList<Organization>> ListAsync(CancellationToken cancellationToken)
-            => Task.FromResult<IReadOnlyList<Organization>>(Items);
+        public Task<Organization?> FindByIdAsync(Guid id, CancellationToken cancellationToken)
+            => Task.FromResult(Items.FirstOrDefault(o => o.Id == id));
 
         public Task SaveChangesAsync(CancellationToken cancellationToken)
         {
@@ -72,18 +77,39 @@ public class OrganizationHandlersTests
     }
 
     [Fact]
-    public async Task List_ReturnsMappedDtosForAllOrganizations()
+    public async Task GetMyOrganization_ReturnsCallersOwnOrg()
     {
+        var orgId = Guid.NewGuid();
         var repo = new FakeOrganizationRepository();
-        repo.Items.Add(Organization.Create(Guid.NewGuid(), "Acme", "acme"));
-        repo.Items.Add(Organization.Create(Guid.NewGuid(), "Globex", "globex"));
-        var handler = new ListOrganizationsHandler(repo);
+        repo.Items.Add(Organization.Create(orgId, "Acme", "acme"));
+        var handler = new GetMyOrganizationHandler(repo, new FakeTenantContext(orgId));
 
-        var result = await handler.Handle(new ListOrganizationsQuery(), CancellationToken.None);
+        var result = await handler.Handle(new GetMyOrganizationQuery(), CancellationToken.None);
 
         Assert.True(result.IsSuccess);
-        Assert.Equal(2, result.Value.Count);
-        Assert.Contains(result.Value, d => d.Slug == "acme");
-        Assert.Contains(result.Value, d => d.Slug == "globex");
+        Assert.Equal(orgId, result.Value.Id);
+        Assert.Equal("acme", result.Value.Slug);
+    }
+
+    [Fact]
+    public async Task GetMyOrganization_WithoutTenant_ReturnsUnauthorized()
+    {
+        var repo = new FakeOrganizationRepository();
+        var handler = new GetMyOrganizationHandler(repo, new FakeTenantContext(Guid.Empty));
+
+        var result = await handler.Handle(new GetMyOrganizationQuery(), CancellationToken.None);
+
+        Assert.Equal(ResultStatus.Unauthorized, result.Status);
+    }
+
+    [Fact]
+    public async Task GetMyOrganization_WhenOrgMissing_ReturnsNotFound()
+    {
+        var repo = new FakeOrganizationRepository();
+        var handler = new GetMyOrganizationHandler(repo, new FakeTenantContext(Guid.NewGuid()));
+
+        var result = await handler.Handle(new GetMyOrganizationQuery(), CancellationToken.None);
+
+        Assert.Equal(ResultStatus.NotFound, result.Status);
     }
 }

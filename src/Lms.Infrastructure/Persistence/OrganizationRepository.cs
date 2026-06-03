@@ -12,8 +12,8 @@ public sealed class OrganizationRepository(AppDbContext db) : IOrganizationRepos
     public Task<bool> SlugExistsAsync(string slug, CancellationToken cancellationToken)
         => db.Organizations.AnyAsync(o => o.Slug == slug, cancellationToken);
 
-    public async Task<IReadOnlyList<Organization>> ListAsync(CancellationToken cancellationToken)
-        => await db.Organizations.AsNoTracking().OrderBy(o => o.CreatedAt).ToListAsync(cancellationToken);
+    public Task<Organization?> FindByIdAsync(Guid id, CancellationToken cancellationToken)
+        => db.Organizations.FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
 
     public Task SaveChangesAsync(CancellationToken cancellationToken)
         => db.SaveChangesAsync(cancellationToken);

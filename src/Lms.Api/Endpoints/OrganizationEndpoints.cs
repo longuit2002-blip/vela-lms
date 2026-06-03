@@ -1,8 +1,6 @@
-using Ardalis.Result;
 using Ardalis.Result.AspNetCore;
-using Lms.Application.Organizations.Commands.CreateOrganization;
 using Lms.Application.Organizations.Dtos;
-using Lms.Application.Organizations.Queries.ListOrganizations;
+using Lms.Application.Organizations.Queries.GetMyOrganization;
 using Mediator;
 
 namespace Lms.Api.Endpoints;
@@ -13,41 +11,19 @@ public static class OrganizationEndpoints
     {
         var group = app.MapGroup("/api/v1/organizations").WithTags("Organizations");
 
-        group.MapGet("/", async (ISender sender, CancellationToken cancellationToken) =>
+        // The walking skeleton's cross-tenant list + create are retired: a tenant user only ever sees
+        // their own organization, and org creation now lives in the seed/platform path. The org id is
+        // taken from the JWT (tenant context), never from client input.
+        group.MapGet("/me", async (ISender sender, CancellationToken cancellationToken) =>
         {
-            var result = await sender.Send(new ListOrganizationsQuery(), cancellationToken);
+            var result = await sender.Send(new GetMyOrganizationQuery(), cancellationToken);
             return result.ToMinimalApiResult();
         })
-        .WithName("ListOrganizations")
-        .Produces<IReadOnlyList<OrganizationDto>>();
-
-        group.MapPost("/", async (CreateOrganizationRequest request, ISender sender, CancellationToken cancellationToken) =>
-        {
-            var result = await sender.Send(new CreateOrganizationCommand(request.Name, request.Slug), cancellationToken);
-
-            // Validation failures throw ValidationException -> 422 (GlobalExceptionHandler), not here.
-            // Handle Created/Conflict explicitly for a consistent contract: 201 carries a Location
-            // header, and 409 is problem+json with a type URI (Ardalis maps both without these).
-            if (result.Status == ResultStatus.Created)
-                return Results.Created($"/api/v1/organizations/{result.Value.Id}", result.Value);
-
-            if (result.Status == ResultStatus.Conflict)
-                return Results.Problem(
-                    statusCode: StatusCodes.Status409Conflict,
-                    title: "Conflict",
-                    detail: result.Errors.FirstOrDefault(),
-                    type: "https://errors.vela.app/conflict");
-
-            return result.ToMinimalApiResult();
-        })
-        .WithName("CreateOrganization")
-        .Produces<OrganizationDto>(StatusCodes.Status201Created)
-        .ProducesValidationProblem()
-        .ProducesProblem(StatusCodes.Status409Conflict);
+        .WithName("GetMyOrganization")
+        .RequireAuthorization()
+        .Produces<OrganizationDto>()
+        .ProducesProblem(StatusCodes.Status401Unauthorized);
 
         return app;
     }
 }
-
-/// <summary>Request body for creating an organization (API contract, kept distinct from the command).</summary>
-public sealed record CreateOrganizationRequest(string Name, string Slug);
