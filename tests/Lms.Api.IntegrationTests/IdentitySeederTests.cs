@@ -79,6 +79,8 @@ public sealed class IdentitySeederTests(WebAppFactory factory)
             scope.ServiceProvider.GetRequiredService<IOrganizationRepository>(),
             scope.ServiceProvider.GetRequiredService<IUserRepository>(),
             scope.ServiceProvider.GetRequiredService<IRoleRepository>(),
+            scope.ServiceProvider.GetRequiredService<IDepartmentRepository>(),
+            scope.ServiceProvider.GetRequiredService<IPositionRepository>(),
             scope.ServiceProvider.GetRequiredService<IPasswordHasher>(),
             scope.ServiceProvider.GetRequiredService<IIdGenerator>(),
             options,
