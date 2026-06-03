@@ -14,11 +14,15 @@ namespace Lms.Infrastructure.Seeding;
 /// <c>departments.manage</c> (branch-limited). DeptManager holds neither — its ◐ is over users.
 /// </para>
 /// </summary>
-internal static class SystemRoles
+public static class SystemRoles
 {
-    internal sealed record Definition(string Code, string Name, string[] Permissions);
+    public sealed record Definition(string Code, string Name, string[] Permissions);
 
-    public static IReadOnlyList<Definition> All { get; } =
+    // Expression-bodied (computed on access), not a field initializer: `All` references the
+    // `EveryPermission` field below, and static field initializers run in textual order — a field-init
+    // `All` would read `EveryPermission` before it was assigned (null → NRE). Accessing the property
+    // triggers full static init first, so `EveryPermission` is populated by the time this evaluates.
+    public static IReadOnlyList<Definition> All =>
     [
         new("OrgOwner", "Quản trị tổng", [.. EveryPermission]),
         new("OrgAdmin", "Quản trị viên", [.. EveryPermission.Where(p => p != "org.manage")]),
