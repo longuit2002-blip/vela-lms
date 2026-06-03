@@ -69,17 +69,21 @@ public static class AuthServiceCollectionExtensions
             });
         services.AddAuthorization();
 
-        // Interim coarse login rate limit (no Redis); robust per-IP throttling deferred.
+        // Interim coarse login rate limit, partitioned per client IP (no Redis; a distributed/robust
+        // per-IP throttler is deferred). Partitioning per IP means one caller can't starve others.
         var rateLimit = configuration.GetSection(RateLimitOptions.SectionName).Get<RateLimitOptions>() ?? new RateLimitOptions();
         services.AddRateLimiter(options =>
         {
             options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-            options.AddFixedWindowLimiter("login", limiter =>
-            {
-                limiter.Window = TimeSpan.FromMinutes(1);
-                limiter.PermitLimit = rateLimit.LoginAttemptsPerMinute;
-                limiter.QueueLimit = 0;
-            });
+            options.AddPolicy("login", httpContext =>
+                System.Threading.RateLimiting.RateLimitPartition.GetFixedWindowLimiter(
+                    httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                    _ => new System.Threading.RateLimiting.FixedWindowRateLimiterOptions
+                    {
+                        Window = TimeSpan.FromMinutes(1),
+                        PermitLimit = rateLimit.LoginAttemptsPerMinute,
+                        QueueLimit = 0,
+                    }));
         });
 
         return services;
