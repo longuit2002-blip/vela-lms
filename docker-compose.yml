@@ -1,0 +1,54 @@
+name: lms
+
+# Local development infrastructure only (Postgres / Redis / MinIO).
+# The API and web app run on the host for a fast inner loop (see README).
+# All ports bind to 127.0.0.1 — these services must not be reachable beyond loopback.
+# Credentials come from .env (gitignored); see .env.example. LOCAL ONLY — never reuse in shared/prod.
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-lms}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-lms_local_dev}
+      POSTGRES_DB: ${POSTGRES_DB:-lms}
+    ports:
+      - "127.0.0.1:${POSTGRES_HOST_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks: [lms]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-lms} -d ${POSTGRES_DB:-lms}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "127.0.0.1:${REDIS_HOST_PORT:-6379}:6379"
+    volumes:
+      - redisdata:/data
+    networks: [lms]
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-lms_minio}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-lms_minio_local_dev}
+    ports:
+      - "127.0.0.1:${MINIO_API_HOST_PORT:-9000}:9000"
+      - "127.0.0.1:${MINIO_CONSOLE_HOST_PORT:-9001}:9001"
+    volumes:
+      - miniodata:/data
+    networks: [lms]
+
+volumes:
+  pgdata:
+  redisdata:
+  miniodata:
+
+networks:
+  lms:
+    driver: bridge

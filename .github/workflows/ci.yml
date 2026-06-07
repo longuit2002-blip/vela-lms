@@ -1,0 +1,101 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Cancel superseded runs on the same ref.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Detect which parts of the monorepo changed so we only run the relevant job.
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'src/**'
+              - 'tests/**'
+              - '*.sln'
+              - 'Directory.*.props'
+              - 'global.json'
+              - '.config/**'
+              - '.github/workflows/ci.yml'
+            frontend:
+              - 'web/**'
+              - '.github/workflows/ci.yml'
+
+  backend:
+    needs: changes
+    if: ${{ needs.changes.outputs.backend == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET (from global.json)
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/Directory.Packages.props', '**/*.csproj', 'global.json') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Restore
+        run: dotnet restore Lms.sln
+
+      - name: Build (Release)
+        run: dotnet build Lms.sln --no-restore -c Release
+
+      # Fast first: unit + architecture (the dependency-rule guardrail — fails CI on any violation, AE4).
+      - name: Unit & architecture tests
+        run: |
+          dotnet test tests/Lms.Domain.UnitTests --no-build -c Release
+          dotnet test tests/Lms.Application.UnitTests --no-build -c Release
+          dotnet test tests/Lms.Architecture.Tests --no-build -c Release
+
+      # Slower: integration tests use Testcontainers (Docker is available on ubuntu-latest runners).
+      - name: Integration tests (Testcontainers)
+        run: dotnet test tests/Lms.Api.IntegrationTests --no-build -c Release
+
+  frontend:
+    needs: changes
+    if: ${{ needs.changes.outputs.frontend == 'true' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Build
+        run: pnpm build

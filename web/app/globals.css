@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f7f8fa;
+  --foreground: #1a2230;
+  --surface: #ffffff;
+  --brand-primary: #2563eb;
+  --brand-primary-hover: #1d4ed8;
+  --line: #e3e7ee;
+  --muted: #5b6675;
+}
+
+/* Design-system tokens (docs/design-system/01-foundations.md) mapped to Tailwind v4 @theme. */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-primary: var(--brand-primary);
+  --color-primary-hover: var(--brand-primary-hover);
+  --color-border: var(--line);
+  --color-muted: var(--muted);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}

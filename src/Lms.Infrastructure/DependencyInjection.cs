@@ -1,0 +1,39 @@
+using Lms.Application.Abstractions;
+using Lms.Infrastructure.Identifiers;
+using Lms.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace Lms.Infrastructure;
+
+/// <summary>
+/// Composition root for the Infrastructure layer. Called once from the API host (<c>Program.cs</c>).
+/// This is the only seam where Infrastructure is wired, keeping Domain/Application free of it.
+/// </summary>
+public static class DependencyInjection
+{
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, string connectionString)
+    {
+        services.AddScoped<Persistence.Interceptors.TenantConnectionInterceptor>();
+        services.AddDbContext<AppDbContext>((sp, options) =>
+            options
+                .UseNpgsql(connectionString)
+                .AddInterceptors(sp.GetRequiredService<Persistence.Interceptors.TenantConnectionInterceptor>()));
+        services.AddScoped<IOrganizationRepository, OrganizationRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        services.AddScoped<IDepartmentRepository, DepartmentRepository>();
+        services.AddScoped<IPositionRepository, PositionRepository>();
+        services.AddScoped<IRoleRepository, RoleRepository>();
+        services.AddScoped<IDepartmentClosure, DepartmentClosure>();
+        services.AddScoped<IPermissionResolver, Authorization.PermissionResolver>();
+        services.AddSingleton<IIdGenerator, Uuid7IdGenerator>();
+        services.AddSingleton<IPasswordHasher, Security.Argon2idPasswordHasher>();
+        services.AddSingleton<IRefreshTokenHasher, Security.RefreshTokenHasher>();
+        services.AddSingleton<IJwtTokenIssuer, Security.JwtTokenIssuer>();
+        services.AddMemoryCache();
+        services.AddSingleton<IRefreshReplayCache, Security.RefreshReplayCache>();
+        services.AddScoped<Seeding.IdentitySeeder>();
+        return services;
+    }
+}

@@ -6,7 +6,14 @@
 
 ## 1. Tổng quan / Overview
 
-Hệ thống là **multi-tenant enterprise LMS**: web SPA (Next.js) + mobile app (React Native) gọi **REST API** của backend **ASP.NET Core (.NET 8 LTS)** xây theo **Clean Architecture**. Dữ liệu lưu PostgreSQL; Redis cho cache/leaderboard/realtime backplane; object storage cho media; pipeline FFmpeg cho video HLS; Claude API cho AI.
+Hệ thống là **multi-tenant enterprise LMS**: web SPA (Next.js) + mobile app (React Native) gọi **REST API** của backend **ASP.NET Core (.NET 10 LTS)** xây theo **Clean Architecture**. Dữ liệu lưu PostgreSQL; Redis cho cache/leaderboard/realtime backplane; object storage cho media; pipeline FFmpeg cho video HLS; Claude API cho AI.
+
+> **Lưu ý triển khai (cập nhật khi build walking skeleton, 2026-06-03):** một số lựa chọn đã chốt lại theo thực tế 2026 — áp dụng cho **toàn bộ** docs:
+> - **"Mediator" / "MediatR" trong mọi tài liệu = martinothamar `Mediator` (MIT, source-gen).** MediatR v13+ đã thương mại hóa (07/2025) nên không dùng. API pipeline-behavior gần như giống hệt.
+> - **Target = .NET 10 LTS** (không phải .NET 8). Máy build không có .NET 8 SDK; .NET 10 là LTS hiện hành (hỗ trợ ~2028). SDK pin trong `global.json` (10.0.100-rc.1 lúc build — cài .NET 10 GA SDK trước khi deploy).
+> - **Architecture tests = `NetArchTest.eNhancedEdition`** (bản gốc NetArchTest không còn bảo trì).
+> - **Object mapping = thủ công** (AutoMapper v15+ cũng thương mại hóa); Mapperly nếu cần sau.
+> - **Frontend = Next.js 16** (create-next-app@latest 2026 cho Next 16; spec/plan ghi 15) + React 19 + Tailwind v4 + TanStack Query v5.
 
 ### 1.1 C4 — Level 1: System Context
 
@@ -17,7 +24,7 @@ Hệ thống là **multi-tenant enterprise LMS**: web SPA (Next.js) + mobile app
               │  HTTPS             │                     │
               ▼                    ▼                     ▼
         ┌───────────────────────────────────────────────────────┐
-        │            GOS ACADEMY LMS (this system)              │
+        │            Vela LMS        (this system)              │
         │   Web (Next.js)  ·  Mobile (React Native)  ·  API     │
         └───┬─────────┬─────────┬──────────┬─────────┬──────────┘
             ▼         ▼         ▼          ▼         ▼
@@ -106,17 +113,17 @@ tests/
   Lms.Domain.UnitTests/
   Lms.Application.UnitTests/
   Lms.Api.IntegrationTests/  # WebApplicationFactory + Testcontainers (PG, Redis)
-  Lms.Architecture.Tests/    # NetArchTest: enforce dependency rule
+  Lms.Architecture.Tests/    # NetArchTest.eNhancedEdition: enforce dependency rule
 web/                         # Next.js app (separate)
 mobile/                      # React Native app (separate)
 ```
 
 ### 2.2 Quy ước Clean Architecture
 - **Domain:** thuần POCO, business rules & invariants nằm trong aggregate; phát **domain events**. Không tham chiếu EF/HTTP.
-- **Application:** mỗi use case = 1 `IRequest` (Command/Query) + `Handler`. Cross-cutting qua **MediatR pipeline behaviors**: `ValidationBehavior`, `LoggingBehavior`, `TransactionBehavior`, `AuthorizationBehavior`, `TenantBehavior`.
+- **Application:** mỗi use case = 1 `IRequest` (Command/Query) + `Handler`. Cross-cutting qua **martinothamar Mediator pipeline behaviors**: `ValidationBehavior`, `LoggingBehavior`, `TransactionBehavior`, `AuthorizationBehavior`, `TenantBehavior`.
 - **Infrastructure:** hiện thực **ports** khai báo ở Application (Dependency Inversion). EF Core repository + Unit of Work qua `DbContext`/`SaveChanges`.
 - **Api:** mỏng — nhận request → map → `mediator.Send(...)` → trả `ProblemDetails`/DTO. Không chứa business logic.
-- **Architecture tests** (NetArchTest) ép: Domain không tham chiếu Application/Infra; Api không tham chiếu trực tiếp Infra trừ composition root.
+- **Architecture tests** (NetArchTest.eNhancedEdition) ép: Domain không tham chiếu Application/Infra; Api không tham chiếu trực tiếp Infra trừ composition root.
 
 ### 2.3 CQRS & ví dụ
 
@@ -153,9 +160,9 @@ public sealed class PublishCourseHandler
 ### 3.1 Backend
 | Hạng mục | Chọn | Lý do |
 |---|---|---|
-| Runtime | .NET 8 (LTS) | Ổn định dài hạn, hiệu năng cao, hệ sinh thái enterprise |
+| Runtime | .NET 10 (LTS) | LTS hiện hành (hỗ trợ ~2028), hiệu năng cao, hệ sinh thái enterprise |
 | Web | ASP.NET Core Web API | Chuẩn, nhanh, middleware mạnh |
-| Mediator/CQRS | MediatR | Tách use case, pipeline behaviors |
+| Mediator/CQRS | **martinothamar Mediator** (MIT, source-gen) | Tách use case, pipeline behaviors. *MediatR v13+ thương mại hóa → dùng martinothamar (MIT)* |
 | ORM | EF Core 8 + Npgsql | Migrations, LINQ, mạnh với PostgreSQL |
 | Validation | FluentValidation | Khai báo rõ ràng, test được |
 | Mapping | Mapster (hoặc thủ công) | Nhanh, ít magic |
@@ -209,8 +216,8 @@ Chi tiết infra/CI-CD/scaling: [T9](09-infra-security-nfr.md).
 
 | ADR | Quyết định | Lý do | Hệ quả |
 |---|---|---|---|
-| **ADR-001** | Backend **ASP.NET Core (.NET 8) + Clean Architecture** | Yêu cầu khách hàng; enterprise; testable; tách biệt rõ | Cần kỷ luật tầng; nhiều project |
-| **ADR-002** | **CQRS với MediatR** (không event sourcing) | Tách read/write, pipeline cross-cutting; ES quá nặng cho LMS | Read model có thể tối ưu riêng |
+| **ADR-001** | Backend **ASP.NET Core (.NET 10 LTS) + Clean Architecture** | Yêu cầu khách hàng; enterprise; testable; tách biệt rõ. *(.NET 10 chốt khi build — máy không có .NET 8; .NET 10 là LTS hiện hành)* | Cần kỷ luật tầng; nhiều project |
+| **ADR-002** | **CQRS với martinothamar Mediator** (MIT; không event sourcing) | Tách read/write, pipeline cross-cutting; ES quá nặng cho LMS. *MediatR v13+ thương mại hóa → martinothamar (MIT)* | Read model có thể tối ưu riêng |
 | **ADR-003** | **PostgreSQL** đơn cơ sở, multi-tenant **shared DB + `organization_id`** | Đơn giản vận hành ở giai đoạn đầu; cách ly bằng query filter + RLS | Cần global query filter + test cách ly; tách DB/tenant để sau nếu cần |
 | **ADR-004** | Cây tổ chức bằng **closure table** (+ option `ltree`) | Truy vấn cha/con & gán quyền theo nhánh nhanh | Bảng phụ `department_paths` |
 | **ADR-005** | **RBAC + ABAC**; permission codes; enforce ở Application (behavior) + DB RLS | Phân quyền đa chiều (role × scope × nhánh) | Logic auth tập trung, test kỹ |

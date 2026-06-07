@@ -208,7 +208,7 @@
 
 ## E14 · Onboarding & Tenant `[M]` *(suy luận — cần cho greenfield, không có trong hand-over)*
 
-**E14-S1** Là BetterWork operator, tôi muốn tạo **tổ chức (tenant)** mới + tài khoản OrgOwner đầu tiên.
+**E14-S1** Là Vela operator (platform), tôi muốn tạo **tổ chức (tenant)** mới + tài khoản OrgOwner đầu tiên.
 - AC: tạo organization → seed cây tổ chức tối thiểu, 9 rank mặc định, 7 loại hình đào tạo, 6 skill group.
 
 **E14-S2** Là OrgOwner mới, tôi muốn wizard onboarding: nhập thông tin tổ chức, import user, tạo khóa đầu tiên.
