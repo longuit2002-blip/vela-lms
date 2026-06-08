@@ -1,7 +1,7 @@
 // Admin register — neutral, data-forward surfaces with ORANGE as the single brand accent.
 // Amber/red appear ONLY for warning/at-risk data. Color is semantic only.
 import { VelaAppShell } from "@/components/vela/app-shell";
-import { ActionButton, DataTable, MetricCard, SectionFrame, StatusPill } from "@/components/vela/ui";
+import { ActionButton, DataTable, MetricCard, StatusPill } from "@/components/vela/ui";
 import { branchMap } from "@/lib/mock-lms";
 
 // Orange = brand + on-track. Amber = warning. Red = at-risk. Nothing else gets a hue.
@@ -172,7 +172,7 @@ function AccountLedger() {
                     ? "danger"
                     : member.status === "Chờ kích hoạt"
                       ? "warning"
-                      : "success"
+                      : "default"
                 }
               >
                 {member.status}
