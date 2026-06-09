@@ -24,6 +24,13 @@ public sealed class CourseRepository(AppDbContext db) : ICourseRepository
             .Where(c => ids.Contains(c.Id))
             .ToListAsync(cancellationToken);
 
+    // The aggregate adds the module/lesson to its own collection, but EF marks a graph-discovered child
+    // with a client-set key as Modified (it assumes the row exists). Explicitly staging it as Added is
+    // what makes SaveChanges INSERT rather than UPDATE-a-missing-row.
+    public void AddModule(Module module) => db.Add(module);
+
+    public void AddLesson(Lesson lesson) => db.Add(lesson);
+
     public Task SaveChangesAsync(CancellationToken cancellationToken)
         => db.SaveChangesAsync(cancellationToken);
 }

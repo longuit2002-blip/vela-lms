@@ -20,6 +20,8 @@ public class PublishingHandlersTests
     {
         public Dictionary<Guid, Course> Store { get; } = new();
         public Task AddAsync(Course c, CancellationToken ct) { Store[c.Id] = c; return Task.CompletedTask; }
+        public void AddModule(Module module) { }
+        public void AddLesson(Lesson lesson) { }
         public Task<Course?> FindByIdAsync(Guid id, CancellationToken ct) => Task.FromResult(Store.GetValueOrDefault(id));
         public Task<IReadOnlyList<Course>> ListByIdsAsync(IReadOnlyCollection<Guid> ids, CancellationToken ct)
             => Task.FromResult<IReadOnlyList<Course>>([.. Store.Values.Where(c => ids.Contains(c.Id))]);

@@ -21,6 +21,7 @@ public sealed class AddModuleHandler(
             return Result.NotFound("Course not found.");
 
         var module = course.AddModule(idGenerator.NewId(), command.Title, DateTimeOffset.UtcNow);
+        repository.AddModule(module);
         await repository.SaveChangesAsync(cancellationToken);
 
         return Result.Created(module.ToDto());

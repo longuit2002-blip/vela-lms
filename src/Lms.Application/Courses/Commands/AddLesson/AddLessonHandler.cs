@@ -25,6 +25,7 @@ public sealed class AddLessonHandler(
 
         var lesson = course.AddLesson(
             command.ModuleId, idGenerator.NewId(), command.Title, command.VideoUrl, command.DurationSeconds, DateTimeOffset.UtcNow);
+        repository.AddLesson(lesson);
         await repository.SaveChangesAsync(cancellationToken);
 
         return Result.Created(lesson.ToDto());
