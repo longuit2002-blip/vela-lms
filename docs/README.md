@@ -107,4 +107,4 @@
 
 ## 5. Nguồn gốc (Provenance)
 
-Tài liệu nguồn: `GOS-ACADEMY-BetterWork-LMS-Documentation.html` (hand-over khám phá 03/06/2026, 25 ảnh màn hình). Các phần **suy luận/đề xuất** (schema, API, infra, design tokens) được đánh dấu khi cần để phân biệt với **quan sát thực tế** từ sản phẩm gốc.
+Tài liệu nguồn: [`GOS-ACADEMY-BetterWork-LMS-Documentation.html`](file:///C:/Users/cl20411564/Downloads/GOS-ACADEMY-BetterWork-LMS-Documentation.html) (hand-over khám phá 03/06/2026, 25 ảnh màn hình). Các phần **suy luận/đề xuất** (schema, API, infra, design tokens) được đánh dấu khi cần để phân biệt với **quan sát thực tế** từ sản phẩm gốc.

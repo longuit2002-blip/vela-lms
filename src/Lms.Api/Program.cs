@@ -57,6 +57,9 @@ app.MapAuthEndpoints();
 app.MapOrganizationEndpoints();
 app.MapDepartmentEndpoints();
 app.MapPositionEndpoints();
+app.MapCourseEndpoints();
+app.MapPublicationEndpoints();
+app.MapLearningEndpoints();
 
 app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = r => r.Tags.Contains("live") });
 app.MapHealthChecks("/health/ready", new HealthCheckOptions { Predicate = r => r.Tags.Contains("ready") });

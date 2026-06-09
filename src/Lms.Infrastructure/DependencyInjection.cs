@@ -25,6 +25,9 @@ public static class DependencyInjection
         services.AddScoped<IDepartmentRepository, DepartmentRepository>();
         services.AddScoped<IPositionRepository, PositionRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
+        services.AddScoped<ICourseRepository, CourseRepository>();
+        services.AddScoped<IPublicationRepository, PublicationRepository>();
+        services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
         services.AddScoped<IDepartmentClosure, DepartmentClosure>();
         services.AddScoped<IPermissionResolver, Authorization.PermissionResolver>();
         services.AddSingleton<IIdGenerator, Uuid7IdGenerator>();

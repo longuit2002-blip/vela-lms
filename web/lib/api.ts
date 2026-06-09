@@ -167,3 +167,127 @@ export async function changePassword(currentPassword: string, newPassword: strin
 export function getMyOrganization(): Promise<Organization> {
   return authFetch<Organization>("/api/v1/organizations/me");
 }
+
+// --- Learning loop ---
+
+export interface LessonDetail {
+  id: string;
+  title: string;
+  order: number;
+  type: string;
+  videoUrl: string;
+  durationSeconds: number;
+}
+
+export interface ModuleDetail {
+  id: string;
+  title: string;
+  order: number;
+  lessons: LessonDetail[];
+}
+
+export interface CourseDetail {
+  id: string;
+  title: string;
+  slug: string;
+  status: string;
+  modules: ModuleDetail[];
+}
+
+export interface PublicationSummary {
+  id: string;
+  kind: string;
+  contentId: string;
+  title: string;
+  status: string;
+  publishedAt: string | null;
+}
+
+export interface AssignmentResult {
+  publicationId: string;
+  enrolled: number;
+  skipped: number;
+}
+
+export interface EnrollmentSummary {
+  enrollmentId: string;
+  publicationId: string;
+  courseTitle: string;
+  courseSlug: string;
+  progressPercent: number;
+  status: string;
+}
+
+export interface EnrolledLesson {
+  id: string;
+  title: string;
+  order: number;
+  videoUrl: string;
+  durationSeconds: number;
+  completed: boolean;
+}
+
+export interface EnrolledModule {
+  id: string;
+  title: string;
+  order: number;
+  lessons: EnrolledLesson[];
+}
+
+export interface EnrolledCourseDetail {
+  enrollmentId: string;
+  courseTitle: string;
+  status: string;
+  progressPercent: number;
+  modules: EnrolledModule[];
+}
+
+export interface CompleteLessonResult {
+  enrollmentId: string;
+  lessonId: string;
+  progressPercent: number;
+  status: string;
+}
+
+// Authoring (instructor)
+export function createCourse(title: string, slug: string): Promise<CourseDetail> {
+  return authFetch<CourseDetail>("/api/v1/courses", { method: "POST", body: { title, slug } });
+}
+
+export function addModule(courseId: string, title: string): Promise<ModuleDetail> {
+  return authFetch<ModuleDetail>(`/api/v1/courses/${courseId}/modules`, { method: "POST", body: { title } });
+}
+
+export function addLesson(
+  courseId: string,
+  moduleId: string,
+  lesson: { title: string; videoUrl: string; durationSeconds: number },
+): Promise<LessonDetail> {
+  return authFetch<LessonDetail>(`/api/v1/courses/${courseId}/modules/${moduleId}/lessons`, { method: "POST", body: lesson });
+}
+
+// Publishing + assignment (L&D)
+export function createPublication(courseId: string, title: string): Promise<PublicationSummary> {
+  return authFetch<PublicationSummary>("/api/v1/publications", { method: "POST", body: { courseId, title } });
+}
+
+export function publishPublication(publicationId: string): Promise<PublicationSummary> {
+  return authFetch<PublicationSummary>(`/api/v1/publications/${publicationId}/publish`, { method: "POST", body: {} });
+}
+
+export function assignPublication(publicationId: string, userIds: string[]): Promise<AssignmentResult> {
+  return authFetch<AssignmentResult>(`/api/v1/publications/${publicationId}/assign`, { method: "POST", body: { userIds } });
+}
+
+// Learner
+export function getMyEnrollments(): Promise<EnrollmentSummary[]> {
+  return authFetch<EnrollmentSummary[]>("/api/v1/me/enrollments");
+}
+
+export function getEnrolledCourse(enrollmentId: string): Promise<EnrolledCourseDetail> {
+  return authFetch<EnrolledCourseDetail>(`/api/v1/enrollments/${enrollmentId}`);
+}
+
+export function completeLesson(enrollmentId: string, lessonId: string): Promise<CompleteLessonResult> {
+  return authFetch<CompleteLessonResult>(`/api/v1/enrollments/${enrollmentId}/lessons/${lessonId}/complete`, { method: "POST", body: {} });
+}
