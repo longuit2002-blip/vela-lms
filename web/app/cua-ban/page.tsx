@@ -1,9 +1,8 @@
-import { AssetIcon } from "@/components/vela/assets";
 import { ShellIconButton, ShellSearch, VelaAppShell } from "@/components/vela/app-shell";
 import { ActionButton, DataTable, IconBadge, ProgressBar, RankEmblem, StatusPill, type Tone } from "@/components/vela/ui";
 import { currentUser, leaderboard, learnerQueue } from "@/lib/mock-lms";
 import { LearnerRunway, type Checkpoint } from "./runway";
-import { OperationsBody } from "../_ops/ops-sections";
+import { OperatorHome } from "./operator";
 import { RoleLens } from "./role-lens";
 
 // Data only — LearnerRunway samples the SVG path to place each node on the curve.
@@ -17,35 +16,6 @@ const checkpoints: Checkpoint[] = [
 export default async function CuaBanPage({ searchParams }: { searchParams: Promise<{ role?: string }> }) {
   const sp = await searchParams;
   return sp.role === "operator" ? <OperatorHome /> : <LearnerHome />;
-}
-
-// Operator/admin view of the home: the shared operations composition (mock B), same body as
-// /bao-cao. Switch back to the learner view via the role lens.
-function OperatorHome() {
-  return (
-    <VelaAppShell active="Từ công ty" lens="L&D Admin" topbar={<OperatorTopbar />}>
-      <OperationsBody />
-    </VelaAppShell>
-  );
-}
-
-function OperatorTopbar() {
-  return (
-    <div className="grid items-center gap-4 xl:grid-cols-[240px_minmax(320px,1fr)_auto]">
-      <div>
-        <h1 className="text-2xl font-extrabold leading-tight text-foreground">Từ công ty</h1>
-        <p className="mt-1 text-sm font-medium text-muted">Vận hành đào tạo toàn tổ chức.</p>
-      </div>
-      <ShellSearch placeholder="Tìm khóa học, người học, báo cáo..." className="hidden md:flex" />
-      <div className="flex flex-wrap justify-end gap-2">
-        <RoleLens role="operator" />
-        <button className="vela-focus inline-flex min-h-10 items-center gap-2 rounded-lg border border-border bg-surface px-3 font-mono text-sm font-semibold text-foreground">
-          <AssetIcon name="data" className="size-4 text-subtle" />
-          01/06–30/06/2026
-        </button>
-      </div>
-    </div>
-  );
 }
 
 function LearnerHome() {
