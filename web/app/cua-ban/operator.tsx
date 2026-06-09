@@ -108,56 +108,63 @@ function OrganizationMap() {
       title="Bản đồ tổ chức & đối tượng"
       description="Theo phòng ban, chi nhánh & scope"
       action={
-        <div className="flex items-center gap-3">
-          <span className="hidden items-center gap-3 text-[11px] font-semibold text-muted lg:flex">
-            <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-success" /> Hoạt động tốt</span>
-            <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-danger" /> Rủi ro cao</span>
-          </span>
-          <div className="flex rounded-lg border border-border bg-surface-muted p-1 text-xs font-semibold text-muted">
-            <span className="rounded-md bg-surface px-3 py-1.5 text-foreground">Branches</span>
-            <span className="px-3 py-1.5">Scopes</span>
-          </div>
+        <div className="flex rounded-lg border border-border bg-surface-muted p-1 text-xs font-semibold text-muted">
+          <span className="rounded-md bg-surface px-3 py-1.5 text-foreground">Branches</span>
+          <span className="px-3 py-1.5">Scopes</span>
         </div>
       }
     >
       <div className="ops-canvas px-4 py-5">
-        <div className="relative z-10 grid gap-4 lg:grid-cols-[170px_minmax(0,1fr)]">
-          <div className="self-start rounded-lg bg-ink-rail p-4 text-white shadow-[0_8px_16px_oklch(0.2_0.02_52/.22)]">
+        {/* org total — full-width header card (avoids cramping the branch matrix beside it) */}
+        <div className="relative z-10 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 rounded-lg bg-ink-rail px-5 py-4 text-white">
+          <div className="min-w-0">
             <p className="text-base font-bold leading-tight">BetterWork Vietnam</p>
-            <p className="mt-1 text-xs font-medium text-white/70">Toàn tổ chức</p>
-            <p className="mt-4 font-mono text-xl font-extrabold">1.248 / 1.840</p>
-            <p className="text-xs font-medium text-white/65">68% hoàn thành</p>
-            <div className="mt-3"><ProgressBar value={68} tone="warm" /></div>
+            <p className="mt-0.5 text-xs font-medium text-white/65">Toàn tổ chức · 4 chi nhánh</p>
           </div>
-
-          <div className="grid gap-2.5">
-            {branchMap.map((branch) => {
-              const c = branchColor(branch.tone);
-              return (
-                <div key={branch.branch} className="grid gap-3 rounded-lg border border-border bg-surface/95 p-3 lg:grid-cols-[minmax(150px,1fr)_minmax(220px,300px)] lg:items-center">
-                  <div className="grid grid-cols-[40px_1fr_auto] items-center gap-3">
-                    <IconBadge icon={branchIcon(branch.tone)} tone={branchTone(branch.tone)} />
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-foreground">{branch.branch}</p>
-                      <p className="text-xs font-medium text-muted">{branch.city}</p>
-                      <p className="mt-0.5 font-mono text-xs font-bold text-foreground">{branch.assigned}</p>
-                    </div>
-                    <span className={`font-mono text-sm font-bold ${c}`}>{branch.percent}%</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    {branch.scopes.map((scope) => (
-                      <div key={scope.label} className="rounded-lg border border-border bg-surface-raised px-3 py-2">
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-subtle">{scope.label}</p>
-                        <p className="font-mono text-xs font-bold text-foreground">{scope.value}</p>
-                        <p className={`font-mono text-[11px] font-bold ${c}`}>{scope.percent}%</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
+          <span className="flex items-center gap-3 text-[11px] font-semibold text-white/80">
+            <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-success" /> Hoạt động tốt</span>
+            <span className="flex items-center gap-1"><span className="size-2 rounded-full bg-danger" /> Rủi ro cao</span>
+          </span>
+          <div className="text-right">
+            <p className="font-mono text-xl font-extrabold leading-none">1.248 / 1.840</p>
+            <p className="mt-1 text-xs font-medium text-white/65">68% hoàn thành</p>
           </div>
         </div>
+        <div className="relative z-10 mt-2 h-1.5 overflow-hidden rounded-full bg-surface-muted">
+          <div className="h-full rounded-full bg-primary" style={{ width: "68%" }} />
+        </div>
+
+        <div className="relative z-10 mt-3 grid gap-2.5">
+          {branchMap.map((branch) => {
+            const c = branchColor(branch.tone);
+            return (
+              <div key={branch.branch} className="grid gap-3 rounded-lg border border-border bg-surface/95 p-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] sm:items-center">
+                <div className="flex items-center gap-3">
+                  <IconBadge icon={branchIcon(branch.tone)} tone={branchTone(branch.tone)} />
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-foreground">
+                      {branch.branch} <span className="text-xs font-medium text-muted">· {branch.city}</span>
+                    </p>
+                    <p className="font-mono text-xs font-bold text-foreground">
+                      {branch.assigned} <span className={`ml-1 ${c}`}>{branch.percent}%</span>
+                    </p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {branch.scopes.map((scope) => (
+                    <div key={scope.label} className="rounded-lg border border-border bg-surface-raised px-3 py-2">
+                      <p className="truncate text-[11px] font-semibold uppercase tracking-wide text-subtle">{scope.label}</p>
+                      <p className="mt-0.5 font-mono text-xs font-bold text-foreground">
+                        {scope.value} <span className={c}>{scope.percent}%</span>
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
         <p className="relative z-10 mt-4 flex items-center gap-2 border-t border-border pt-3 text-xs font-medium text-muted">
           <AssetIcon name="help" className="size-4 text-primary" />
           Dữ liệu cập nhật: 07/06/2026 10:30
