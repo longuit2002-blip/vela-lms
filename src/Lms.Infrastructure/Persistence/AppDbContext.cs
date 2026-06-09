@@ -1,8 +1,11 @@
 using Lms.Application.Abstractions;
+using Lms.Domain.Courses;
 using Lms.Domain.Departments;
 using Lms.Domain.Identity;
+using Lms.Domain.Learning;
 using Lms.Domain.Organizations;
 using Lms.Domain.Positions;
+using Lms.Domain.Publishing;
 using Lms.Domain.Roles;
 using Lms.Domain.Users;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +25,9 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options, ITenant
     public DbSet<DepartmentClosureRow> DepartmentClosure => Set<DepartmentClosureRow>();
     public DbSet<Position> Positions => Set<Position>();
     public DbSet<Role> Roles => Set<Role>();
+    public DbSet<Course> Courses => Set<Course>();
+    public DbSet<Publication> Publications => Set<Publication>();
+    public DbSet<Enrollment> Enrollments => Set<Enrollment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -38,6 +44,13 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options, ITenant
         modelBuilder.Entity<Department>().HasQueryFilter(d => d.OrganizationId == _orgId);
         modelBuilder.Entity<DepartmentClosureRow>().HasQueryFilter(c => c.OrganizationId == _orgId);
         modelBuilder.Entity<Position>().HasQueryFilter(p => p.OrganizationId == _orgId);
+
+        // Learning-loop aggregate roots. Only the roots carry organization_id and are filtered here;
+        // their child entities (modules, lessons, lesson_progress) have no tenant column and are
+        // isolated transitively — they are only ever loaded through a tenant-scoped parent.
+        modelBuilder.Entity<Course>().HasQueryFilter(c => c.OrganizationId == _orgId);
+        modelBuilder.Entity<Publication>().HasQueryFilter(p => p.OrganizationId == _orgId);
+        modelBuilder.Entity<Enrollment>().HasQueryFilter(e => e.OrganizationId == _orgId);
 
         base.OnModelCreating(modelBuilder);
     }

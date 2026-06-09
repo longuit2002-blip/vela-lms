@@ -10,7 +10,7 @@ namespace Lms.Domain.Learning;
 /// </summary>
 public sealed class Enrollment : Entity, IAggregateRoot
 {
-    private readonly List<LessonProgress> _progress = new();
+    private readonly List<LessonProgress> _lessonProgress = new();
 
     public Guid OrganizationId { get; private set; }
     public Guid UserId { get; private set; }
@@ -23,7 +23,7 @@ public sealed class Enrollment : Entity, IAggregateRoot
     public DateTimeOffset CreatedAt { get; private set; }
     public DateTimeOffset UpdatedAt { get; private set; }
 
-    public IReadOnlyList<LessonProgress> LessonProgress => _progress.AsReadOnly();
+    public IReadOnlyList<LessonProgress> LessonProgress => _lessonProgress.AsReadOnly();
 
     // Required by EF Core for materialization.
     private Enrollment() { }
@@ -64,7 +64,7 @@ public sealed class Enrollment : Entity, IAggregateRoot
 
         var enrollment = new Enrollment(id, organizationId, userId, publicationId, EnrollmentSource.Assigned, now);
         foreach (var lessonId in ids)
-            enrollment._progress.Add(new LessonProgress(Guid.NewGuid(), id, lessonId));
+            enrollment._lessonProgress.Add(new LessonProgress(Guid.NewGuid(), id, lessonId));
         return enrollment;
     }
 
@@ -75,7 +75,7 @@ public sealed class Enrollment : Entity, IAggregateRoot
     /// </summary>
     public void CompleteLesson(Guid lessonId, DateTimeOffset now)
     {
-        var progress = _progress.FirstOrDefault(p => p.LessonId == lessonId)
+        var progress = _lessonProgress.FirstOrDefault(p => p.LessonId == lessonId)
             ?? throw new ArgumentException("Lesson is not part of this enrollment.", nameof(lessonId));
 
         var changed = progress.Complete(now);
@@ -88,10 +88,10 @@ public sealed class Enrollment : Entity, IAggregateRoot
             StartedAt = now;
         }
 
-        var completed = _progress.Count(p => p.Status == LessonProgressStatus.Completed);
-        ProgressPercent = completed * 100 / _progress.Count;
+        var completed = _lessonProgress.Count(p => p.Status == LessonProgressStatus.Completed);
+        ProgressPercent = completed * 100 / _lessonProgress.Count;
 
-        if (completed == _progress.Count)
+        if (completed == _lessonProgress.Count)
         {
             Status = EnrollmentStatus.Completed;
             CompletedAt = now;
