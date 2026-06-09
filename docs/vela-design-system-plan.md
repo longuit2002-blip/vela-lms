@@ -65,6 +65,14 @@ Decorative and structural motifs are now rendered by CSS and components, not SVG
 
 This avoids broken SVG rendering, keeps layout responsive, and makes these motifs themeable with design tokens.
 
+### Learner Hero Imagery (revision 2026-06-08)
+
+The CSS-only rule above is relaxed for **the learner hero on `/cua-ban` only**, to pixel-match approved mock A. The learner hero may use generated raster atmosphere:
+
+- `hero-runway-bg` (warm light field) and `runway-path` (glowing checkpoint path) live in `web/public/vela-assets/learner/` and are referenced by `app/cua-ban/page.tsx`.
+- They carry **atmosphere only** — no baked text, icons, numbers, or UI. Checkpoint badges/labels, the rank gauge, and all data stay code-rendered and themeable.
+- Generation is handed off to Codex + ChatGPT image gen via `docs/asset-handover-cua-ban-learner.md`, recolored to the locked tokens (orange/saffron/coral/gold). Admin surfaces remain CSS-only and image-free.
+
 ## Tokens
 
 Tokens live in `web/app/globals.css` and are mapped to Tailwind v4 via `@theme inline`.
